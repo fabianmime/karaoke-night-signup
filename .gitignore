@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.vscode/
+.idea/
+*.csv
+!scripts/
+
+# Branding-Uploads aus dem Admin-Panel (nur die Schutz-.htaccess gehört ins Repo)
+public/uploads/*
+!public/uploads/.htaccess

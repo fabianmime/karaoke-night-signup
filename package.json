@@ -1,0 +1,13 @@
+{
+  "name": "karaoke-queue-import",
+  "version": "2.0.0",
+  "description": "KaraFun-CSV-Import fuers Karaoke Queue System (PHP-Backend, siehe public/api) - nur das einmalige Import-Skript laeuft als Node-CLI, kein Server mehr",
+  "scripts": {
+    "import": "node scripts/import-karafun.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.6.0",
+    "dotenv": "^16.3.1",
+    "csv-parser": "^3.0.0"
+  }
+}

@@ -1,0 +1,25 @@
+### Hochgeladene Branding-Bilder (Logo/Banner aus dem Admin-Panel).
+### Nur Bilddateien ausliefern - alles andere (insbesondere Skripte) sperren,
+### falls je etwas anderes hier landen sollte. Dateinamen und Endungen
+### vergibt ausschliesslich api/branding-upload.php.
+<FilesMatch ".*">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+<FilesMatch "^(logo|banner)-[a-f0-9]{16}\.(png|jpg|webp|gif)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Allow from all
+    </IfModule>
+</FilesMatch>
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
