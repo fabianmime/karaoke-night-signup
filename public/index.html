@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karaoke Night - Song anmelden</title>
+  <meta name="apple-mobile-web-app-title" content="Karaoke">
+  <meta name="application-name" content="Karaoke">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:ital,wght@1,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="brand-header">
+      <img data-brand-logo alt="" class="brand-logo">
+      <p class="eyebrow" data-brand-event-name hidden></p>
+      <h1 class="event-title">Karaoke <em>Night</em></h1>
+      <p class="event-location" data-brand-subtitle hidden></p>
+      <p class="tagline">Song anmelden oder mitvoten</p>
+    </header>
+
+    <main>
+      <div id="announcementBanner" class="announcement" style="display: none;"></div>
+
+      <!-- Anmeldesperre -->
+      <section id="lockedMessage" style="display: none;">
+        <div class="song-card">
+          <h2>Anmeldung geschlossen</h2>
+          <p>Es können aktuell keine neuen Songs angemeldet werden.</p>
+          <button type="button" class="btn btn-secondary" onclick="showHome()" style="margin-top: 12px;">← Zurück</button>
+        </div>
+      </section>
+
+      <!-- Votingsperre -->
+      <section id="votingLockedMessage" style="display: none;">
+        <div class="song-card">
+          <h2>Voting geschlossen</h2>
+          <p>Es können aktuell keine neuen Stimmen vergeben werden.</p>
+          <button type="button" class="btn btn-secondary" onclick="showHome()" style="margin-top: 12px;">← Zurück</button>
+        </div>
+      </section>
+
+      <!-- Startauswahl -->
+      <section id="homeChoice" class="home-choice">
+        <div class="home-choice-buttons">
+          <button type="button" id="goRegisterBtn" class="btn btn-primary">Song anmelden</button>
+          <button type="button" id="goVoteBtn" class="btn btn-secondary">Song voten</button>
+        </div>
+      </section>
+
+      <!-- Suchbereich -->
+      <section class="search-section" id="searchSection" style="display: none;">
+        <button type="button" class="back-link" id="backFromSearchBtn">← Zurück</button>
+        <h2>Song suchen</h2>
+        <div id="songTakenMessage" class="taken-message" style="display: none;"></div>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Titel oder Künstler..."
+          class="search-input"
+        >
+        <div id="searchResults" class="search-results"></div>
+      </section>
+
+      <!-- Voting -->
+      <section class="voting-section" id="votingSection" style="display: none;">
+        <button type="button" class="back-link" id="backFromVoteBtn">← Zurück</button>
+        <h2>Songs voten</h2>
+        <p class="votes-hint" id="votesRemainingHint"></p>
+        <div id="votingList" class="voting-list"></div>
+      </section>
+
+      <!-- Ausgewählter Song -->
+      <section class="selected-song" id="selectedSongSection" style="display: none;">
+        <h2>Ausgewählter Song</h2>
+        <div class="song-card" id="selectedSongCard"></div>
+      </section>
+
+      <!-- Anmeldeformular -->
+      <section class="form-section" id="formSection" style="display: none;">
+        <h2>Deine Daten</h2>
+        <form id="registrationForm" novalidate>
+          <div class="form-group">
+            <label for="firstName">Vorname *</label>
+            <input type="text" id="firstName" required>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Nachname *</label>
+            <input type="text" id="lastName" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Telefonnummer *</label>
+            <input
+              type="tel"
+              id="phone"
+              placeholder="z.B. +41 79 123 45 67"
+              pattern="\+?[0-9 \-/]{6,20}"
+              title="Telefonnummer mit Ländervorwahl (mit oder ohne +), z.B. +41 79 123 45 67"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email">E-Mail *</label>
+            <input type="email" id="email" required>
+          </div>
+
+          <div id="duetGroup" style="display: none;">
+            <label>Wer singt das Duett mit dir? *</label>
+            <div class="form-group" style="margin-top: 8px;">
+              <label for="duetFirstName">Vorname *</label>
+              <input type="text" id="duetFirstName" required>
+            </div>
+            <div class="form-group">
+              <label for="duetLastName">Nachname *</label>
+              <input type="text" id="duetLastName" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="comment">Information / Bemerkung für die Moderation</label>
+            <textarea id="comment" rows="3"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Song anmelden</button>
+        </form>
+      </section>
+
+      <!-- Erfolgsmeldung -->
+      <section id="successMessage" style="display: none;">
+        <div class="success-card">
+          <h2><span class="eq-bars"><span></span><span></span><span></span></span>Erfolgreich angemeldet!</h2>
+          <p id="positionMessage"></p>
+          <button onclick="location.reload()" class="btn btn-secondary">Neuer Song</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="ct-footer" id="ctFooter"></footer>
+  </div>
+
+  <script src="/js/branding.js"></script>
+  <script src="/js/track.js" data-page="guest"></script>
+  <script src="/js/guest.js"></script>
+</body>
+</html>

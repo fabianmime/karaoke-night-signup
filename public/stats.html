@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Karaoke Statistik</title>
+  <meta name="apple-mobile-web-app-title" content="Karaoke STATS">
+  <meta name="application-name" content="Karaoke STATS">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <script>
+    // Gleiches Theme-Handling wie im Admin (kein Aufblitzen beim Laden).
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      } catch (e) { /* localStorage evtl. nicht verfügbar */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/stats.css">
+</head>
+<body>
+
+  <!-- Login: eigener Zugang, unabhängig vom Admin-Passwort -->
+  <main id="loginSection" class="login-main" style="display:none;">
+    <div class="login-card">
+      <img data-brand-logo alt="" class="login-logo">
+      <h1>Statistik</h1>
+      <p class="sub" data-brand-app-name>Karaoke</p>
+      <form id="loginForm">
+        <label for="statsPassword">Passwort</label>
+        <div class="row-with-button">
+          <input type="password" id="statsPassword" autocomplete="current-password" required>
+          <button type="button" class="btn-icon password-toggle" data-target="statsPassword" aria-label="Passwort anzeigen">👁</button>
+        </div>
+        <button type="submit" class="btn login-submit">Anmelden</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </div>
+  </main>
+
+  <div id="statsPanel" style="display:none;">
+    <nav class="topnav">
+      <span class="brand-link">
+        <img data-brand-logo alt="" class="nav-logo">
+        <span class="stats-brand">Statistik</span>
+      </span>
+      <div class="nav-tabs">
+        <button class="active" data-tab="overview">Übersicht</button>
+        <button data-tab="search">Suche</button>
+        <button data-tab="songs">Songs &amp; Voting</button>
+        <button data-tab="flow">Ablauf</button>
+        <button data-tab="visitors">Besucher</button>
+        <button data-tab="manage" class="btn-icon" title="Export &amp; Einstellungen" aria-label="Export und Einstellungen">⚙</button>
+        <button type="button" id="theme-toggle" class="btn-icon" title="Theme wechseln" aria-label="Theme wechseln">◐</button>
+        <button type="button" id="logoutBtn" class="btn-icon" title="Abmelden" aria-label="Abmelden">⏻</button>
+      </div>
+    </nav>
+
+    <main>
+      <!-- Zeitraum-Filter: gilt für alle Tabs -->
+      <div class="range-bar">
+        <div class="range-presets" role="group" aria-label="Zeitraum">
+          <button type="button" data-range="1h">Letzte Stunde</button>
+          <button type="button" data-range="today" class="active">Heute</button>
+          <button type="button" data-range="yesterday">Gestern</button>
+          <button type="button" data-range="7d">7 Tage</button>
+          <button type="button" data-range="all">Alles</button>
+          <button type="button" data-range="custom">Eigener…</button>
+        </div>
+        <div class="range-custom" id="rangeCustom" hidden>
+          <label>Von <input type="datetime-local" id="rangeFrom"></label>
+          <label>Bis <input type="datetime-local" id="rangeTo"></label>
+          <button type="button" class="btn" id="rangeApply">Anzeigen</button>
+        </div>
+        <p class="range-info" id="rangeInfo"></p>
+      </div>
+
+      <p id="loadError" class="error" hidden></p>
+
+      <!-- Übersicht -->
+      <section class="panel active" id="panel-overview">
+        <div class="live-strip" id="liveStrip"></div>
+        <div class="tiles" id="overviewTiles"></div>
+
+        <div class="card">
+          <h2>Aktive Gäste</h2>
+          <p class="hint">Gäste mit geöffneter Anmelde-/Voting-Seite pro Zeitabschnitt.</p>
+          <div class="chart-box"><canvas id="activeChart" aria-label="Aktive Gäste im Zeitverlauf" role="img"></canvas></div>
+          <details class="table-toggle"><summary>Als Tabelle</summary><div id="activeTable"></div></details>
+        </div>
+
+        <div class="card">
+          <h2>Aktivität</h2>
+          <p class="hint">Suchen, Anmeldungen und Stimmen pro Zeitabschnitt.</p>
+          <div class="chart-box"><canvas id="activityChart" aria-label="Suchen, Anmeldungen und Stimmen im Zeitverlauf" role="img"></canvas></div>
+          <details class="table-toggle"><summary>Als Tabelle</summary><div id="activityTable"></div></details>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2>Weg zur Anmeldung</h2>
+            <p class="hint">Verschiedene Besucher pro Schritt.</p>
+            <div id="funnel"></div>
+          </div>
+          <div class="card">
+            <h2>Weg zum Voting</h2>
+            <p class="hint">Verschiedene Besucher pro Schritt.</p>
+            <div id="voteFunnel"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Suche -->
+      <section class="panel" id="panel-search">
+        <div class="tiles" id="searchTiles"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Meistgesuchte Begriffe</h2>
+            <div id="topTerms"></div>
+          </div>
+          <div class="card">
+            <h2>Suchen ohne Treffer</h2>
+            <p class="hint">Hinweis auf Songs, die im Katalog fehlen, oder auf Tippfehler.</p>
+            <div id="zeroTerms"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Am häufigsten ausgewählte Songs</h2>
+          <p class="hint">In der Trefferliste angetippt, unabhängig davon, ob die Anmeldung danach abgeschlossen wurde.</p>
+          <div id="topSelected"></div>
+        </div>
+      </section>
+
+      <!-- Songs & Voting -->
+      <section class="panel" id="panel-songs">
+        <div class="tiles" id="songTiles"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Meiste Stimmen</h2>
+            <div id="topVoted"></div>
+          </div>
+          <div class="card">
+            <h2>Stimmen pro Voter</h2>
+            <p class="hint">Wie viele der 3 möglichen Stimmen die Gäste genutzt haben.</p>
+            <div id="votesPerVoter"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Mehrfach gewünscht</h2>
+          <p class="hint">Anmeldeversuche für Songs, die bereits vergeben waren.</p>
+          <div id="wantedTaken"></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Genres</h2><div id="bdGenre"></div></div>
+          <div class="card"><h2>Sprachen</h2><div id="bdLanguage"></div></div>
+          <div class="card"><h2>Jahrzehnte</h2><div id="bdDecade"></div></div>
+          <div class="card"><h2>Interpreten</h2><div id="bdArtist"></div></div>
+        </div>
+      </section>
+
+      <!-- Ablauf -->
+      <section class="panel" id="panel-flow">
+        <div class="tiles" id="flowTiles"></div>
+        <div class="card">
+          <h2>Setlist</h2>
+          <p class="hint">Gesungene Songs in der Reihenfolge des Auftritts, mit Wartezeit seit der Anmeldung und Zeit auf der Bühne.</p>
+          <div class="table-wrap" id="setlist"></div>
+        </div>
+      </section>
+
+      <!-- Besucher -->
+      <section class="panel" id="panel-visitors">
+        <div class="tiles" id="visitorTiles"></div>
+        <div class="card">
+          <h2>Seiten</h2>
+          <div class="table-wrap" id="pagesTable"></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h2>Gerätetyp</h2><div id="devDevice"></div></div>
+          <div class="card"><h2>Betriebssystem</h2><div id="devOs"></div></div>
+          <div class="card"><h2>Browser</h2><div id="devBrowser"></div></div>
+          <div class="card">
+            <h2>Herkunft</h2>
+            <p class="hint">Über <code>?src=…</code> in der URL, z.B. <code>/?src=plakat</code> für den QR-Code auf dem Plakat.</p>
+            <div id="sources"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export & Einstellungen -->
+      <section class="panel" id="panel-manage">
+        <div class="card">
+          <h2>Export</h2>
+          <p class="hint">Rohdaten des gewählten Zeitraums als CSV (für Excel).</p>
+          <div class="button-row">
+            <a class="btn" id="exportEvents" href="#">Ereignisse (CSV)</a>
+            <a class="btn btn-secondary" id="exportVisits" href="#">Besuche (CSV)</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Statistik-Passwort ändern</h2>
+          <form id="passwordForm">
+            <label for="currentPassword">Aktuelles Passwort</label>
+            <input type="password" id="currentPassword" autocomplete="current-password" required>
+            <label for="newPassword">Neues Passwort (mind. 8 Zeichen)</label>
+            <input type="password" id="newPassword" autocomplete="new-password" minlength="8" required>
+            <button type="submit" class="btn">Speichern</button>
+          </form>
+          <p id="passwordFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card card-danger-zone">
+          <h2>⚠️ Statistik zurücksetzen</h2>
+          <p class="hint">Löscht <strong>alle</strong> Statistikdaten unwiderruflich (Besuche, Suchen, Klickpfade, erfasste Anmeldungen/Stimmen/Statuswechsel). Die Warteschlange und die Anmeldungen im Admin bleiben unberührt. Gedacht zum Entfernen von Testdaten vor dem Event.</p>
+          <form id="resetForm">
+            <label for="resetPassword">Zur Bestätigung Statistik-Passwort eingeben</label>
+            <input type="password" id="resetPassword" autocomplete="current-password" required>
+            <button type="submit" class="btn-danger">Statistik zurücksetzen</button>
+          </form>
+          <p id="resetFeedback" class="feedback"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="/js/branding.js"></script>
+  <script src="/js/stats.js"></script>
+</body>
+</html>

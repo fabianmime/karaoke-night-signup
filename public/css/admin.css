@@ -1,0 +1,917 @@
+/* Admin-Panel - an das Design-System des LiveVoice Pi Streamers angeglichen
+   (gleiche CSS-Variablen/Komponenten: Karten, Buttons, Formulare, Theme-
+   Umschalter), damit Fabians Tools optisch zusammengehören. Guest-/Display-
+   Seite bleiben auf ihrem eigenen style.css. */
+
+:root {
+  --bg: #f7f5f3;
+  --card-bg: #ffffff;
+  --input-bg: #f0ece8;
+  --text: #1c1b1a;
+  --muted: #6b6560;
+  --green: #178a44;
+  --red: #b8302f;
+  --accent: #f56230;
+  --border: #e4ded9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1114;
+    --card-bg: #151a1e;
+    --input-bg: #222a31;
+    --text: #e8ecea;
+    --muted: #8b9793;
+    --green: #3ee39b;
+    --red: #d43f3f;
+    --accent: #f56230;
+    --border: #222a31;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1114;
+  --card-bg: #151a1e;
+  --input-bg: #222a31;
+  --text: #e8ecea;
+  --muted: #8b9793;
+  --green: #3ee39b;
+  --red: #d43f3f;
+  --accent: #f56230;
+  --border: #222a31;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.25rem 1.25rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-logo {
+  height: 56px;
+  max-width: 260px;
+  object-fit: contain;
+  width: auto;
+  display: block;
+}
+
+.nav-tabs { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+
+.nav-tabs button {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.55rem 1rem;
+  border-radius: 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-tabs button.active {
+  color: var(--text);
+  background: var(--border);
+}
+
+.btn-icon {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 1.2rem;
+  line-height: 1;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.btn-icon:hover { background: var(--border); }
+/* Als Link (z.B. Display-Icon neben dem Logo) statt <button> */
+a.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+/* Gleicher, rahmenloser Look wie die Icons rechts in .nav-tabs */
+.brand-link a.btn-icon { border: none; color: var(--muted); }
+.brand-link a.btn-icon:hover { color: var(--text); }
+.nav-tabs button.btn-icon.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+#bannerToggleBtn.banner-active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.panel { display: none; flex-direction: column; gap: 1.25rem; }
+.panel.active { display: flex; }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Deutlich als riskant markiert - roter Rand statt der normalen Karte,
+   damit "Alle Daten löschen" nicht zwischen den harmlosen Einstellungen
+   untergeht. */
+.card-danger-zone {
+  border: 1px solid var(--red);
+  background: color-mix(in srgb, var(--red) 6%, var(--card-bg));
+}
+.card-danger-zone h2 { color: var(--red); }
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.card-nested {
+  margin-top: 1rem;
+  box-shadow: none;
+  background: var(--input-bg);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.8rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 48px;
+  line-height: 1.1;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent);
+  font-family: inherit;
+  touch-action: manipulation;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:not(:disabled):hover { filter: brightness(1.08); }
+.btn:not(:disabled):active { transform: scale(0.98); }
+
+/* Buttons, die direkt in einer Karte (oder einer verschachtelten
+   Karte/Details, z.B. Songkatalog/Footer) liegen und nicht in einem
+   <form>, das selbst schon einen Abstand setzt) - sonst kleben sie am
+   Feld darüber. */
+.card > .btn,
+.card > .btn-secondary,
+.card > .btn-danger,
+.card-nested > .btn,
+.card-nested > .btn-secondary,
+.card-nested > .btn-danger {
+  margin-top: 1rem;
+}
+
+.btn-secondary {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  min-height: 44px;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.95rem;
+}
+.btn-secondary:not(:disabled):hover { filter: none; background: var(--border); }
+
+.btn-danger {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red);
+  min-height: 44px;
+  padding: 0.7rem 1.1rem;
+  font-size: 0.95rem;
+}
+.btn-danger:not(:disabled):hover { filter: none; background: var(--red); color: #fff; }
+
+.button-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* ---------- Forms ---------- */
+
+form { display: flex; flex-direction: column; gap: 0.5rem; }
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-top: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+input[type="text"], input[type="password"], input[type="number"], textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  min-height: 48px;
+  line-height: 1.2;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+textarea { min-height: 80px; resize: vertical; }
+
+/* Felder innerhalb einer verschachtelten Karte (z.B. "Bands sammelweise
+   markieren", "Songkatalog verwalten") teilten sich sonst exakt dieselbe
+   Hintergrundfarbe wie .card-nested selbst (beide var(--input-bg)) - im
+   Darkmode sind dort Rand UND beide Flächen sogar identisch (#222a31),
+   das Feld war praktisch unsichtbar. Eigene, dunklere Fläche schafft
+   sichtbaren Kontrast zur umgebenden Karte. */
+.card-nested input[type="text"],
+.card-nested input[type="password"],
+.card-nested input[type="number"],
+.card-nested textarea {
+  background: var(--card-bg);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.row-with-button {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.row-with-button input { flex: 1 1 auto; width: auto; min-width: 0; }
+.row-with-button .btn-icon { flex: none; min-height: 48px; height: 48px; }
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 400;
+  margin-top: 0.9rem;
+}
+.checkbox-label input { width: auto; min-height: auto; }
+
+.hint { color: var(--muted); font-size: 0.95rem; margin: 0.3rem 0 0; }
+
+.inline-link { color: var(--accent); font-weight: 600; text-decoration: underline; }
+.inline-link:hover { opacity: 0.8; }
+
+.error { color: var(--red); font-weight: 600; }
+.success { color: var(--green); font-weight: 600; }
+
+form .btn { align-self: flex-start; margin-top: 1rem; }
+
+/* ---------- Details / de-emphasized section ---------- */
+
+details.advanced {
+  margin-top: 1rem;
+}
+details.advanced:first-child { margin-top: 0; }
+
+details.advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+details.advanced summary:hover { color: var(--text); }
+
+/* ---------- Login ---------- */
+
+.login-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.login-card { width: 100%; max-width: 380px; text-align: center; }
+.login-card .mic { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+.login-logo { height: 110px; width: auto; max-width: 100%; object-fit: contain; display: block; margin: 0 auto 1rem; }
+.login-card h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+.login-card .sub { color: var(--muted); margin: 0 0 1.5rem; }
+.login-card .row-with-button,
+.login-card label { text-align: left; }
+.login-submit { width: 100%; justify-content: center; margin-top: 1rem; }
+
+/* ---------- Warteschlange ---------- */
+
+.queue-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.queue-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.queue-item {
+  background: var(--input-bg);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid transparent;
+}
+
+.queue-item.is-playing {
+  border-color: var(--green);
+  background: var(--card-bg);
+}
+
+.queue-item-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.queue-pos {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--muted);
+  min-width: 1.6ch;
+}
+
+.queue-item.is-playing .queue-pos { color: var(--green); }
+
+.queue-body { flex: 1; min-width: 0; }
+
+.queue-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.queue-title {
+  flex: 1;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.queue-singer {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.queue-item.is-playing .queue-singer { color: var(--green); }
+
+.queue-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-contact { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+.votes-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Stift + Stimmenzahl rechtsbündig übereinander - gleiches Muster wie
+   Sänger/Stimmen auf dem Display. */
+.comment-line-actions {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.filter-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+  white-space: nowrap;
+  color: #fff;
+  cursor: help;
+}
+.filter-badge-review { background: var(--accent); }
+.filter-badge-blocked { background: var(--red); }
+
+.comment-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.muted-hint { color: var(--muted); font-style: italic; }
+
+.btn-icon-edit {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0 0.2rem;
+  line-height: 1.4;
+  font-family: inherit;
+}
+.btn-icon-edit:hover { color: var(--accent); }
+
+.comment-edit { margin-top: 0.4rem; }
+.comment-edit textarea { font-size: 0.9rem; min-height: 60px; }
+
+.comment-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+}
+
+.comment-save-status { font-size: 0.78rem; color: var(--muted); }
+.comment-save-status.pending { color: var(--accent); }
+.comment-save-status.error { color: var(--red); font-weight: 600; }
+
+/* .status-pill wird seit der Umstellung auf renderQueueActions() (Primär-
+   Button + "⋮"-Menü) nur noch im Filter-Tab gebraucht (Song suchen &
+   markieren + Bands sammelweise markieren), nicht mehr für die
+   Warteschlangen-Status selbst. */
+.status-pill {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.status-pill.current { color: #fff; border-color: transparent; }
+.status-pill.current[data-value="none"] { background: var(--muted); }
+.status-pill.current[data-value="review"] { background: var(--accent); }
+.status-pill.current[data-value="blocked"] { background: var(--red); }
+
+/* Statt 5 gleichwertiger Pills nur noch der nächstlogische Schritt als
+   grosser primärer Button (Angemeldet -> Genehmigt -> Singt -> Fertig) plus
+   ein "⋮"-Menü für die selteneren übrigen Status (siehe renderQueueActions()
+   in admin.js). */
+.queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.btn-primary-action {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.6rem 1.1rem;
+  min-height: 44px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: #fff;
+  background: var(--muted);
+}
+.btn-primary-action:hover { filter: brightness(1.08); }
+.btn-primary-action[data-value="approved"] { background: var(--accent); }
+.btn-primary-action[data-value="playing"] { background: var(--green); color: #04150c; }
+.btn-primary-action[data-value="completed"] { background: var(--green); color: #04150c; }
+
+.dropdown-wrap { position: relative; flex-shrink: 0; }
+
+/* 44px = Mindestmass für Touch-Ziele (Apple/Google HIG) - Admin/Moderation
+   laufen am Event auf Tablets. */
+.dots-btn { min-width: 44px; min-height: 44px; font-size: 1.3rem; }
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  padding: 0.35rem;
+  z-index: 30;
+}
+.dropdown-wrap.open .dropdown-menu { display: flex; flex-direction: column; }
+
+.dropdown-menu button {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  padding: 0.55rem 0.6rem;
+  min-height: 44px;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.dropdown-menu button:hover { background: var(--input-bg); }
+
+/* "Jetzt auf der Bühne"-Panel für den Admin - inhaltlich/optisch an das
+   Display-Panel angelehnt, aber ohne Vollbild-Spotlight und ohne die
+   Warteschlangen-Tabelle zu verschieben: sitzt fix in der linken Marge
+   neben dem zentrierten <main> (siehe ADMIN_PANEL_MIN_WIDTH in admin.js -
+   nur sichtbar, wenn dafür genug Platz ist). */
+.admin-now-playing-panel {
+  display: none;
+  position: fixed;
+  left: calc(50% - 924px);
+  width: 300px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 0.9rem;
+  padding: 1.1rem 1.1rem 1.2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+.admin-now-playing-panel.active { display: block; animation: admin-panel-in 0.4s ease; }
+@keyframes admin-panel-in {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.admin-now-playing-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--green);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  margin-bottom: 0.7rem;
+}
+.admin-now-playing-eyebrow .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.admin-now-playing-title {
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  margin-bottom: 0.15rem;
+  word-break: break-word;
+}
+.admin-now-playing-artist { color: var(--muted); font-size: 0.88rem; margin-bottom: 0.6rem; }
+.admin-now-playing-singer { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+.admin-now-playing-panel .queue-actions { margin-top: 0.8rem; }
+
+/* Bemerkung im Panel etwas grösser/luftiger als in der normalen Liste und
+   optisch abgesetzt (Trennlinie) - bleibt aber dieselbe Notiz-Bearbeitung
+   (renderCommentLine()), nur grösser dargestellt. */
+.admin-now-playing-comment {
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.1rem;
+}
+.admin-now-playing-comment .comment-edit textarea { font-size: 1.1rem; }
+/* Notiz-Text fett - Feld bleibt bei fehlender Notiz leer statt "Keine
+   Notiz" zu zeigen (siehe renderCommentLine() in admin.js), :empty greift
+   dann einfach ins Leere. */
+.admin-now-playing-comment .comment-line > span:first-child {
+  font-weight: 700;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: grab;
+  font-size: 1.2rem;
+  touch-action: none;
+  user-select: none;
+}
+.drag-handle:hover { color: var(--text); }
+
+.queue-item.dragging {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+.queue-item-placeholder {
+  border: 2px dashed var(--border);
+  border-radius: 0.75rem;
+  background: var(--input-bg);
+}
+
+.history-item-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.history-item {
+  background: var(--input-bg);
+  border-radius: 0.75rem;
+  padding: 0.7rem 1rem;
+  opacity: 0.85;
+}
+
+.history-item .queue-title { font-weight: 600; }
+
+.history-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+  color: #fff;
+}
+.history-badge.completed { background: var(--text); color: var(--bg); }
+.history-badge.cancelled { background: var(--red); }
+
+.empty-state {
+  color: var(--muted);
+  text-align: center;
+  padding: 2.5rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.75rem;
+}
+
+/* ---------- Songs verwalten ---------- */
+
+.songs-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+  min-height: 40px;
+}
+
+.song-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.7rem;
+}
+
+.song-row-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.92rem;
+}
+
+.song-row-text .artist { color: var(--muted); }
+
+/* ---------- Filter (Gesperrt / Prüfen) ---------- */
+
+.filter-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  min-height: 40px;
+}
+
+.filter-row {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-row-text {
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.filter-row-text .artist { color: var(--muted); }
+
+.filter-reason-input {
+  font-size: 0.88rem;
+  padding: 0.5rem 0.6rem;
+  min-height: 40px;
+}
+
+.filter-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.add-song-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.add-song-form .full { grid-column: 1 / -1; }
+.add-song-form label { margin-top: 0.3rem; }
+
+.import-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.import-row input[type="file"] { color: var(--muted); font-size: 0.85rem; flex: 1; min-width: 180px; }
+
+.feedback { font-size: 0.88rem; margin-top: 0.6rem; min-height: 1.2em; }
+.feedback.ok { color: var(--green); }
+.feedback.err { color: var(--red); }
+
+.catalog-count { color: var(--muted); font-size: 0.88rem; margin-top: 0.6rem; }
+
+.quickguide-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.quickguide-list li {
+  margin-bottom: 0.6rem;
+}
+
+.quickguide-list li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 480px) {
+  .add-song-form { grid-template-columns: 1fr; }
+}
+
+.ct-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 20px 16px 28px;
+}
+
+.ct-footer a { color: inherit; text-decoration: none; }
+.ct-footer a:hover { text-decoration: underline; }
+
+/* ---------- Modal (z.B. Abmelde-Bestätigung) ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.modal-card p {
+  margin: 0 0 1.2rem;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.modal-actions .btn,
+.modal-actions .btn-secondary {
+  flex: 1;
+}
+
+/* Logo kommt per js/branding.js aus den Settings - bis dahin unsichtbar
+   statt kurz ein kaputtes Bild-Symbol zu zeigen. */
+img[data-brand-logo]:not(.brand-ready) { visibility: hidden; }
+
+/* Branding-Vorschau im Admin: dunkler Hintergrund, weil
+   die Gäste-Seite und das Display dunkel sind - so sieht man, wie ein
+   transparentes Logo dort wirkt. */
+.branding-preview {
+  margin-top: 0.6rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+}
+.branding-preview img { max-width: 100%; max-height: 120px; object-fit: contain; }
+.branding-preview-banner img { max-height: 220px; }
+.branding-preview[hidden] { display: none; }
+#resetLogoBtn, #resetBannerBtn { margin-top: 0.6rem; }

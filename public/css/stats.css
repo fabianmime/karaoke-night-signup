@@ -1,0 +1,296 @@
+/* Statistik-Ansicht (/stats) - baut auf admin.css auf (gleiche Karten,
+   Buttons, Theme-Variablen), hier nur die zusätzlichen Bausteine: Kacheln,
+   Balkenlisten, Diagramm-Container, Zeitraum-Filter. Diagrammfarben als
+   eigene Tokens, für Dunkelmodus separat gewählt (nicht automatisch
+   invertiert). */
+
+:root {
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --bar-track: #efebe7;
+  --grid: #e9e4df;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --bar-track: #1d2429;
+    --grid: #232b31;
+  }
+}
+
+:root[data-theme="dark"] {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --bar-track: #1d2429;
+  --grid: #232b31;
+}
+
+.stats-brand {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Zeitraum ---------- */
+
+.range-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.range-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.range-presets button {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.range-presets button:hover { background: var(--input-bg); }
+
+.range-presets button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.range-custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem;
+}
+
+.range-custom label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.range-custom input {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  min-height: 40px;
+}
+
+.range-custom .btn { margin-top: 0; }
+.range-custom[hidden] { display: none; }
+
+.range-info {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Live & Kacheln ---------- */
+
+.live-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.live-strip .live-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 0.35rem;
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+.live-strip strong { font-variant-numeric: tabular-nums; }
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+.tile {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+}
+
+.tile-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tile-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-top: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile-sub {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 0.2rem;
+}
+
+/* ---------- Layout ---------- */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 1.25rem;
+}
+
+.grid-2 > .card { min-width: 0; }
+
+.chart-box {
+  position: relative;
+  height: 260px;
+}
+
+.table-toggle { margin-top: 0.75rem; }
+.table-toggle summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.table-toggle summary:hover { color: var(--text); }
+.table-toggle[open] summary { margin-bottom: 0.5rem; }
+.table-toggle > div { max-height: 320px; overflow: auto; }
+
+/* ---------- Balkenlisten ---------- */
+
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "label value" "bar bar";
+  gap: 0.2rem 0.75rem;
+  align-items: baseline;
+}
+
+.bar-label {
+  grid-area: label;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.93rem;
+}
+
+.bar-value {
+  grid-area: value;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 0.93rem;
+}
+
+.bar-value .bar-extra {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+  margin-left: 0.4rem;
+}
+
+.bar-track {
+  grid-area: bar;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--series-1);
+  min-width: 2px;
+}
+
+/* Funnel: Stufen untereinander, Anteil am ersten Schritt */
+.funnel .bar-track { height: 14px; border-radius: 4px; }
+
+.empty-note {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0.25rem 0;
+}
+
+/* ---------- Tabellen ---------- */
+
+.table-wrap { overflow-x: auto; }
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+table.data th,
+table.data td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+table.data th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+table.data td.num,
+table.data th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+table.data td.wrap { white-space: normal; min-width: 200px; }
+
+.feedback { min-height: 1.2em; margin: 0.5rem 0 0; }
+.feedback.ok { color: var(--green); font-weight: 600; }
+.feedback.err { color: var(--red); font-weight: 600; }
+
+a.btn { text-decoration: none; }
+
+@media (max-width: 600px) {
+  .tile-value { font-size: 1.55rem; }
+  .chart-box { height: 220px; }
+  .nav-tabs button:not(.btn-icon) { padding-left: 0.6rem; padding-right: 0.6rem; }
+}

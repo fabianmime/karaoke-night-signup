@@ -1,0 +1,32 @@
+### Kein Langzeit-Caching für HTML/JS/CSS - der Server-Default (7 Tage) hat
+### schon dazu geführt, dass Browser eine veraltete admin.js weiterbenutzt
+### haben, obwohl der Server längst eine neue Version hatte. Revalidierung
+### per ETag bleibt möglich (billig), nur das blinde 7-Tage-Vertrauen fällt weg.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(html|js|css)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>
+<IfModule mod_expires.c>
+    <FilesMatch "\.(html|js|css)$">
+        ExpiresActive Off
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^admin/?$ admin.html [L]
+    RewriteRule ^display/?$ display.html [L]
+    RewriteRule ^moderation/?$ moderation.html [L]
+    RewriteRule ^stats/?$ stats.html [L]
+</IfModule>
+
+<FilesMatch "(^\.env(\..*)?$|^config\.php$|^database\.sql$|^package(-lock)?\.json$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

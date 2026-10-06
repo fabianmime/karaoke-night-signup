@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Karaoke Moderation</title>
+  <meta name="apple-mobile-web-app-title" content="Karaoke MOD">
+  <meta name="application-name" content="Karaoke MOD">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      } catch (e) { /* localStorage evtl. nicht verfügbar */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/moderation.css">
+</head>
+<body>
+
+  <!-- Login -->
+  <main id="loginSection" class="login-main">
+    <div class="login-card">
+      <img data-brand-logo alt="" class="login-logo">
+      <h1>Moderation</h1>
+      <p class="sub" data-brand-app-name>Karaoke</p>
+      <form id="loginForm">
+        <label for="modPasswordInput">Passwort</label>
+        <div class="row-with-button">
+          <input type="password" id="modPasswordInput" autocomplete="current-password" required>
+          <button type="button" class="btn-icon password-toggle" data-target="modPasswordInput" aria-label="Passwort anzeigen">👁</button>
+        </div>
+        <button type="submit" class="btn login-submit">Anmelden</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </div>
+  </main>
+
+  <!-- Moderation -->
+  <div id="modPanel" style="display:none;">
+    <nav class="topnav">
+      <span class="brand-link"><img data-brand-logo alt="" class="nav-logo"></span>
+      <div class="nav-tabs">
+        <div class="dropdown-wrap">
+          <button type="button" id="modSettingsBtn" class="btn-icon" title="Benachrichtigungen" aria-label="Benachrichtigungen" onclick="this.closest('.dropdown-wrap').classList.toggle('open')">⚙</button>
+          <div class="dropdown-menu mod-settings-menu">
+            <label class="checkbox-label">
+              <input type="checkbox" id="modNotifySound">
+              🔊 Ton bei neuer Anmeldung
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="modNotifyVibrate">
+              📳 Vibration bei neuer Anmeldung
+            </label>
+          </div>
+        </div>
+        <button type="button" id="theme-toggle" class="btn-icon" title="Theme wechseln" aria-label="Theme wechseln">◐</button>
+        <button type="button" class="btn-icon" title="Abmelden" aria-label="Abmelden" onclick="logout()">⏻</button>
+      </div>
+    </nav>
+
+    <main class="mod-main">
+      <div id="currentSlot"></div>
+
+      <h2 class="mod-next-heading">Als Nächstes</h2>
+      <div id="nextList" class="mod-next-list"></div>
+    </main>
+  </div>
+
+  <footer class="ct-footer" id="ctFooter"></footer>
+
+  <div id="logoutModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <p>Wirklich abmelden?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="cancelLogout()">Abbrechen</button>
+        <button type="button" class="btn" onclick="confirmLogout()">Ja, abmelden</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/branding.js"></script>
+  <script src="/js/track.js" data-page="moderation"></script>
+  <script src="/js/moderation.js"></script>
+</body>
+</html>

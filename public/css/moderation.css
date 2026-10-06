@@ -1,0 +1,234 @@
+/* Moderations-Ansicht - mobil/Hochformat-optimiert (Handy in der Hand
+   während des Events), baut auf admin.css (gleiches Design-System) auf. */
+
+/* Zahnrad-Menü fürs Ton/Vibration-Setting - .dropdown-wrap/.dropdown-menu
+   kommen aus admin.css, hier nur die Checkbox-Zeilen etwas breiter/luftiger
+   als die sonst dort üblichen reinen Text-Buttons. */
+.mod-settings-menu {
+  min-width: 230px;
+  padding: 0.5rem;
+  gap: 0.2rem;
+}
+.mod-settings-menu .checkbox-label {
+  padding: 0.5rem 0.4rem;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.mod-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mod-current {
+  background: var(--card-bg);
+  border: 2px solid var(--accent);
+  border-radius: 1.2rem;
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.mod-current-label {
+  text-transform: none;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 0.4rem;
+}
+
+.mod-current-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.mod-current-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.3rem 0 0;
+}
+
+.mod-current-artist {
+  color: var(--muted);
+  font-size: 1.1rem;
+  text-align: left;
+}
+
+.mod-current-singer {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}
+
+.mod-next-heading {
+  font-size: 1.05rem;
+  color: var(--muted);
+  margin: 0.5rem 0 0;
+}
+
+.mod-next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mod-item {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 0.9rem 1rem;
+}
+
+.mod-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* Platz für den Info-Streifen rechts freihalten, damit ein langer Titel
+     nicht darunter läuft. .mod-item hat schon 1rem eigenes Padding, daher
+     hier nur die Differenz zur Streifenbreite (28px) - sonst rückt der Name
+     unnötig weit von der Karte weg. */
+  padding-right: 0.9rem;
+}
+
+.mod-item-pos {
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 1.6ch;
+}
+
+.mod-item-body { flex: 1; min-width: 0; }
+
+.mod-item-title {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mod-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.mod-item-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.mod-item-singer {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--text);
+  text-align: right;
+}
+
+.mod-info-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* Volle Kartenhöhe statt einer kleinen Ecke gibt reichlich Tapfläche
+     (Touch-Ziel), obwohl die Breite jetzt wieder schlank ist - die Namen
+     rechts sind wegen padding-right auf .mod-item-row sowieso schon
+     eingerückt, der Streifen läuft also nichts an. */
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-radius: 0 0.9rem 0.9rem 0;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  font-family: Georgia, serif;
+}
+
+.mod-info-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.mod-comment {
+  display: none;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  padding-right: 0.9rem;
+  border-top: 1px solid var(--border);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.mod-comment.expanded { display: block; }
+
+/* Notiz bearbeiten (Moderation darf Notizen selbst pflegen) */
+.mod-info-btn-add { color: var(--muted); font-style: normal; font-family: inherit; font-size: 1.1rem; }
+
+.mod-comment-edit-btn,
+.mod-comment-add {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.mod-comment-add { margin-top: 0.8rem; }
+
+.mod-comment-editing textarea {
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-height: 90px;
+}
+
+.mod-comment-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.mod-comment-done {
+  border: none;
+  border-radius: 0.6rem;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mod-empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 2rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.9rem;
+}

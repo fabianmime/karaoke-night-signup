@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karaoke Admin</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <script>
+    // Vor dem CSS-Laden anwenden, damit beim Neuladen kein falsches Theme
+    // kurz aufblitzt (FOUC) - gleiches Muster wie beim LiveVoice Pi Streamer.
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+      } catch (e) { /* localStorage evtl. nicht verfügbar */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+  <!-- Login -->
+  <main id="loginSection" class="login-main">
+    <div class="login-card">
+      <img data-brand-logo alt="" class="login-logo">
+      <h1>Admin Center</h1>
+      <p class="sub" data-brand-app-name>Karaoke</p>
+      <form id="loginForm">
+        <label for="adminPassword">Passwort</label>
+        <div class="row-with-button">
+          <input type="password" id="adminPassword" autocomplete="current-password" required>
+          <button type="button" class="btn-icon password-toggle" data-target="adminPassword" aria-label="Passwort anzeigen">👁</button>
+        </div>
+        <button type="submit" class="btn login-submit">Anmelden</button>
+      </form>
+      <p id="loginError" class="error"></p>
+    </div>
+  </main>
+
+  <!-- Admin -->
+  <div id="adminPanel" style="display:none;">
+    <nav class="topnav">
+      <div class="brand-link">
+        <a href="#" onclick="switchTab('queue'); return false;" title="Zur Warteschlange" aria-label="Zur Warteschlange">
+          <img data-brand-logo alt="" class="nav-logo">
+        </a>
+        <a href="/display" target="_blank" rel="noopener" class="btn-icon" title="Display in neuem Tab öffnen" aria-label="Display in neuem Tab öffnen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </a>
+      </div>
+      <div class="nav-tabs">
+        <button class="active" data-tab="queue">Warteschlange</button>
+        <button data-tab="filter">Filter</button>
+        <button type="button" id="bannerToggleBtn" class="btn-icon" title="Display auf Vollbild-Banner umschalten" aria-label="Display auf Vollbild-Banner umschalten">
+          <svg id="eyeIconOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="eyeIconClosed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+        </button>
+        <button data-tab="settings" class="btn-icon" title="Einstellungen" aria-label="Einstellungen">⚙</button>
+        <button type="button" id="theme-toggle" class="btn-icon" title="Theme wechseln" aria-label="Theme wechseln">◐</button>
+        <button type="button" class="btn-icon" title="Abmelden" aria-label="Abmelden" onclick="logout()">⏻</button>
+      </div>
+    </nav>
+
+    <aside id="adminNowPlayingPanel" class="admin-now-playing-panel"></aside>
+
+    <main>
+      <!-- Warteschlange -->
+      <section id="queuePanel" class="panel active">
+        <div class="card">
+          <div class="queue-toolbar">
+            <span id="queueCount">–</span>
+          </div>
+          <p class="hint" id="bannerModeHint" style="margin-top:0.4rem;"></p>
+          <div id="queueList" class="queue-list" style="margin-top:1rem;"></div>
+
+          <details class="advanced">
+            <summary>Verlauf (Fertig / Storniert)</summary>
+            <div id="historyList" class="queue-list" style="margin-top:1rem;"></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Filter -->
+      <section id="filterPanel" class="panel">
+        <div class="card">
+          <h2>Song suchen &amp; markieren</h2>
+          <p class="hint">Songs mit z.B. vulgärer Sprache oder anstössigem Bandhintergrund markieren - "Prüfen" zeigt nur einen Hinweis (Anmeldung bleibt möglich), "Gesperrt" lehnt die Anmeldung mit einer Meldung ab. Die Suche findet auch unauffällige Songs, unabhängig vom aktuellen Status.</p>
+          <input type="text" id="filterSearchInput" placeholder="Song oder Künstler suchen …">
+          <div id="filterSearchResults" class="filter-results"></div>
+        </div>
+
+        <div class="card">
+          <details class="advanced">
+            <summary>Bands sammelweise markieren</summary>
+            <div class="card-nested">
+              <p class="hint">Bandnamen zeilenweise einfügen - genau so geschrieben wie im Katalog (z.B. "Ghost (band)"). Setzt den gewählten Status für <strong>alle</strong> Songs dieser Interpreten auf einmal, statt jeden Song einzeln zu suchen. Bei "Prüfen"/"Gesperrt" werden bereits manuell klassifizierte Songs nie überschrieben; "Keine Sperre" setzt dagegen bewusst auch bestehende Markierungen zurück (zum gezielten Rückgängigmachen).</p>
+              <textarea id="bulkArtistNames" rows="5" placeholder="Ein Bandname pro Zeile …"></textarea>
+              <input type="text" id="bulkFilterReason" placeholder="Grund (optional, z.B. Satanistische Bandsymbolik)" style="margin-top:0.6rem;">
+              <div class="filter-actions" id="bulkStatusPills" style="margin-top:0.6rem;">
+                <button type="button" class="status-pill" data-value="none">Keine Sperre</button>
+                <button type="button" class="status-pill" data-value="review">⚠️ Prüfen!</button>
+                <button type="button" class="status-pill" data-value="blocked">🚫 Gesperrt</button>
+              </div>
+              <button id="bulkApplyBtn" class="btn" style="margin-top:0.8rem;">Anwenden</button>
+              <p id="bulkFeedback" class="feedback"></p>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Aktuell markiert</h2>
+          <details class="advanced" open>
+            <summary>Gesperrt</summary>
+            <div id="filterBlockedList" class="filter-results card-nested"></div>
+          </details>
+          <details class="advanced">
+            <summary>Zu prüfen</summary>
+            <div id="filterReviewList" class="filter-results card-nested"></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Einstellungen -->
+      <section id="settingsPanel" class="panel">
+
+        <div class="card">
+          <details class="advanced">
+            <summary>Schnellanleitung</summary>
+            <div class="card-nested">
+              <ul class="quickguide-list">
+                <li>Neue Anmeldungen sind zuerst nur "Angemeldet" - erst "Genehmigt" (oder "Singt") lässt den Song auf dem öffentlichen Display erscheinen.</li>
+                <li>Reihenfolge in der Warteschlange per Griff ⠿ ziehen umsortierbar.</li>
+                <li>"Storniert" braucht eine extra Bestätigung direkt in der Karte.</li>
+                <li>Fertige/stornierte Einträge landen im Verlauf und werden nie automatisch gelöscht - von dort auch wieder in die Warteschlange zurückholbar.</li>
+                <li>Das Auge oben in der Navigation blendet auf dem Display die Warteschlange aus und zeigt stattdessen einen Vollbild-Banner.</li>
+                <li>Ein Song kann nur einmal aktiv/fertig angemeldet sein - erst "Storniert" gibt ihn wieder frei.</li>
+                <li>Gäste können auf der Startseite ohne Login bis zu 3 Songs voten (anonym) - die Stimmen 🗳️ stehen bei jedem Eintrag in der Warteschlange.</li>
+                <li>Die Moderationsnotiz lässt sich direkt in der Karte über das Stift-Symbol ✎ bearbeiten - sie speichert automatisch beim Tippen, kein Speichern-Klick nötig.</li>
+                <li>Im Tab "Filter" lassen sich einzelne Songs als "Prüfen" (nur Hinweis, Anmeldung bleibt möglich) oder "Gesperrt" (Anmeldung wird abgelehnt) markieren - gesperrte/zu prüfende Songs erscheinen entsprechend markiert in der Warteschlange.</li>
+              </ul>
+            </div>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Anmeldesperre</h2>
+          <p class="hint">Wenn aktiv, können Gäste keine neuen Songs mehr anmelden (die Seite zeigt einen Hinweis).</p>
+          <label class="checkbox-label">
+            <input type="checkbox" id="registrationLocked">
+            Neue Song-Anmeldungen sperren
+          </label>
+
+          <h2 style="margin-top:1.5rem;">Mitteilung für den Screen</h2>
+          <p class="hint">Erscheint als Banner auf der Display-Seite (z.B. "Pause bis 21 Uhr"). Leer lassen zum Ausblenden.</p>
+          <textarea id="announcement" placeholder="z.B. Pause bis 21 Uhr"></textarea>
+
+          <h2 style="margin-top:1.5rem;">Voting</h2>
+          <p class="hint">Gäste können ohne Login bis zu 3 Songs voten (anonym, ohne Sänger-Angabe). Die Stimmen sind hier in der Warteschlange immer sichtbar.</p>
+          <label class="checkbox-label">
+            <input type="checkbox" id="votingLocked">
+            Neue Votes sperren
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="showVotesOnDisplay">
+            Stimmen zusätzlich auf dem Display anzeigen
+          </label>
+
+          <button id="saveGeneralBtn" class="btn">Speichern</button>
+          <p id="generalFeedback" class="feedback"></p>
+
+          <p class="hint" style="margin-top:1.2rem;">Löscht ausnahmslos alle abgegebenen Stimmen unwiderruflich - jede Gästin/jeder Gast hat danach wieder 3 neue Stimmen frei, und alle Song-Zähler stehen wieder auf 0 (beides hängt an derselben Stimmen-Tabelle, lässt sich nicht getrennt zurücksetzen).</p>
+          <button id="resetVotesBtn" class="btn-danger">Alle Stimmen zurücksetzen</button>
+          <p id="resetVotesFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card">
+          <h2>Branding</h2>
+          <p class="hint">Logo, Event-Name und Banner erscheinen auf Anmeldung, Display, Admin, Moderation und Statistik. Ohne eigenes Logo wird ein neutrales Karaoke-Logo verwendet.</p>
+
+          <label for="eventName">Event-Name</label>
+          <input type="text" id="eventName" maxlength="60" placeholder="z.B. Sommerfest 2026">
+          <p class="hint">Steht klein über "Karaoke Night" und im Seitentitel. Leer lassen zum Ausblenden.</p>
+
+          <label for="eventSubtitle">Untertitel / Ort</label>
+          <input type="text" id="eventSubtitle" maxlength="100" placeholder="z.B. Basel · Zürich">
+
+          <button id="saveBrandingTextBtn" class="btn">Texte speichern</button>
+          <p id="brandingTextFeedback" class="feedback"></p>
+
+          <h2 style="margin-top:1.5rem;">Logo</h2>
+          <p class="hint">PNG, JPG, WebP oder GIF, max. 5 MB. Am besten ein Querformat mit transparentem Hintergrund (wirkt auf dunklem und hellem Hintergrund).</p>
+          <div class="branding-preview"><img id="brandingLogoPreview" alt="Aktuelles Logo"></div>
+          <p class="hint" id="brandingLogoStatus"></p>
+          <div class="import-row">
+            <input type="file" id="brandingLogoFile" accept="image/png,image/jpeg,image/webp,image/gif">
+            <button id="uploadLogoBtn" class="btn-secondary">Hochladen</button>
+          </div>
+          <button id="resetLogoBtn" class="btn-secondary">Standard-Logo verwenden</button>
+          <p id="brandingLogoFeedback" class="feedback"></p>
+
+          <h2 style="margin-top:1.5rem;">Display-Banner</h2>
+          <p class="hint">Vollbild-Grafik für das Standbild (Auge-Symbol) und die Ansicht "Banner + Song-Einblendung", idealerweise 16:9 bzw. 1920×1080. Ohne eigenes Bild wird der Banner automatisch aus Logo und Texten gebaut. Max. 10 MB.</p>
+          <div class="branding-preview branding-preview-banner"><img id="brandingBannerPreview" alt="Aktueller Banner"></div>
+          <p class="hint" id="brandingBannerStatus"></p>
+          <div class="import-row">
+            <input type="file" id="brandingBannerFile" accept="image/png,image/jpeg,image/webp,image/gif">
+            <button id="uploadBannerBtn" class="btn-secondary">Hochladen</button>
+          </div>
+          <button id="resetBannerBtn" class="btn-secondary">Automatischen Banner verwenden</button>
+          <p id="brandingBannerFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card">
+          <h2>Verlauf</h2>
+          <p class="hint">Fertige und stornierte Anmeldungen werden nie automatisch gelöscht, nur hier auf Wunsch endgültig entfernt.</p>
+          <button id="clearHistoryBtn" class="btn-danger">Verlauf löschen</button>
+          <p id="historyFeedback" class="feedback"></p>
+
+          <p class="hint" style="margin-top:1.2rem;">Alle Anmeldungen (Warteschlange + Verlauf) als CSV-Datei herunterladen - für die eigene Ablage nach dem Event.</p>
+          <a href="/api/queue-export.php" class="btn-secondary" download>Anmeldeliste als CSV exportieren</a>
+        </div>
+
+        <div class="card">
+          <h2>Moderations-Zugang</h2>
+          <p class="hint">Eigenes Passwort für die <a href="/moderation" class="inline-link" style="color:var(--accent);">Moderations-Ansicht</a> (aktueller/nächste Sänger) - unabhängig vom Admin-Passwort, von der Moderation selbst nicht änderbar.</p>
+          <p class="hint" id="modPasswordStatus"></p>
+          <label for="modPassword">Neues Moderations-Passwort</label>
+          <div class="row-with-button">
+            <input type="password" id="modPassword" autocomplete="new-password">
+            <button type="button" class="btn-icon password-toggle" data-target="modPassword" aria-label="Passwort anzeigen">👁</button>
+          </div>
+          <button id="saveModPasswordBtn" class="btn">Setzen</button>
+          <p id="modPasswordFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card">
+          <h2>Companion-Modul (Show-Steuerung)</h2>
+          <p class="hint">API-Key für das Bitfocus-Companion-Modul (Songwechsel, Standbild, Anmelde-/Voting-Sperre, Ansage-Text - ohne Browser). Wird im Modul als Header <code>X-API-Key</code> mitgeschickt.</p>
+          <label for="controlApiKey">Aktueller Schlüssel</label>
+          <div class="row-with-button">
+            <input type="password" id="controlApiKey" readonly autocomplete="off">
+            <button type="button" class="btn-icon password-toggle" data-target="controlApiKey" aria-label="Schlüssel anzeigen">👁</button>
+            <button type="button" id="copyApiKeyBtn" class="btn-icon" title="Kopieren" aria-label="Kopieren">📋</button>
+          </div>
+          <p class="hint" id="controlApiKeyStatus"></p>
+          <button id="regenerateApiKeyBtn" class="btn-secondary">Neu generieren</button>
+          <p id="controlApiKeyFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card">
+          <h2>Admin-Passwort ändern</h2>
+          <form id="passwordForm">
+            <label for="currentPassword">Aktuelles Passwort</label>
+            <div class="row-with-button">
+              <input type="password" id="currentPassword" autocomplete="current-password" required>
+              <button type="button" class="btn-icon password-toggle" data-target="currentPassword" aria-label="Passwort anzeigen">👁</button>
+            </div>
+
+            <label for="newPassword">Neues Passwort</label>
+            <div class="row-with-button">
+              <input type="password" id="newPassword" autocomplete="new-password" required>
+              <button type="button" class="btn-icon password-toggle" data-target="newPassword" aria-label="Passwort anzeigen">👁</button>
+            </div>
+
+            <button type="submit" class="btn">Passwort ändern</button>
+          </form>
+          <p id="passwordFeedback" class="feedback"></p>
+        </div>
+
+        <div class="card">
+          <details class="advanced">
+            <summary>Songkatalog verwalten</summary>
+
+            <div class="card-nested">
+              <input type="text" id="songSearchInput" placeholder="Song oder Künstler suchen …">
+              <div id="songResults" class="songs-results"></div>
+            </div>
+
+            <div class="card-nested">
+              <h2 style="font-size:1.05rem;">Song hinzufügen</h2>
+              <p class="hint">Für Wünsche, die im Katalog fehlen.</p>
+              <form id="addSongForm" class="add-song-form">
+                <input type="text" id="newTitle" placeholder="Titel *" required>
+                <input type="text" id="newArtist" placeholder="Künstler *" required>
+                <input type="text" id="newGenre" placeholder="Genre">
+                <input type="text" id="newYear" placeholder="Jahr" inputmode="numeric">
+                <input type="text" id="newLanguage" placeholder="Sprache" class="full">
+                <label class="checkbox-label full" style="margin-top:0;">
+                  <input type="checkbox" id="newDuo">
+                  Duett-Song
+                </label>
+                <button type="submit" class="btn full">Hinzufügen</button>
+              </form>
+              <p id="addSongFeedback" class="feedback"></p>
+            </div>
+
+            <div class="card-nested">
+              <h2 style="font-size:1.05rem;">Katalog aktualisieren</h2>
+              <p class="hint">Neue KaraFun-CSV einlesen - bestehende Songs bleiben erhalten, Duplikate werden übersprungen.</p>
+              <div class="import-row">
+                <input type="file" id="importFile" accept=".csv">
+                <button id="importBtn" class="btn-secondary">Importieren</button>
+              </div>
+              <p id="importFeedback" class="feedback"></p>
+              <p class="catalog-count" id="catalogCount"></p>
+            </div>
+          </details>
+
+          <details class="advanced">
+            <summary>Footer</summary>
+            <div class="card-nested">
+              <p class="hint">Erscheint klein unten auf Anmeldung, Display, Admin und Moderation. HTML erlaubt (für den Link).</p>
+              <textarea id="footerHtml" rows="2"></textarea>
+              <button id="saveFooterBtn" class="btn">Speichern</button>
+              <p id="footerFeedback" class="feedback"></p>
+            </div>
+          </details>
+        </div>
+
+        <div class="card card-danger-zone">
+          <h2>⚠️ Gefahrenzone</h2>
+          <p class="hint">Löscht <strong>alle</strong> Anmeldungen unwiderruflich - aktuelle Warteschlange UND kompletter Verlauf, inkl. aller Stimmen dazu. Der Song-Katalog (inkl. Filter-Markierungen) und alle Einstellungen/Passwörter bleiben erhalten. Gedacht z.B. zum Löschen von Testdaten vor dem eigentlichen Event-Start.</p>
+          <button id="deleteAllDataBtn" class="btn-danger">Alle Daten löschen</button>
+          <p id="deleteAllDataFeedback" class="feedback"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="ct-footer" id="ctFooter"></footer>
+
+  <div id="logoutModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <p>Wirklich abmelden?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="cancelLogout()">Abbrechen</button>
+        <button type="button" class="btn" onclick="confirmLogout()">Ja, abmelden</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/branding.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
