@@ -216,4 +216,4 @@ Architektur, Datenbank, vollständige API-Referenz, Design-System und Wartung:
 
 ## Lizenz
 
-[MIT](LICENSE) © Fabian Meyer ([meyer.productions](https://meyer.productions))
+© 2026 [meyer.productions](https://meyer.productions) – veröffentlicht unter der [MIT-Lizenz](LICENSE).
