@@ -130,7 +130,7 @@ config.php, database.sql   →    config.php, database.sql
 package.json               →    package.json
 ```
 
-`README.md`, `LICENSE` und `docs/` werden auf dem Server nicht gebraucht.
+`README.md`, `LICENSE`, `docs/` und `companion-module/` werden auf dem Server nicht gebraucht.
 Sensible Dateien (`.env`, `config.php`, `lib/`, `scripts/` …) sperrt die
 mitgelieferte `.htaccess`.
 
@@ -200,6 +200,10 @@ Für Stream Deck & Co. gibt es eine eigene Control-API (`api/control-*.php`),
 geschützt mit einem API-Key aus **Einstellungen → Companion-Modul** (Header
 `X-API-Key`): nächster Song, Song beenden, Banner-Modus, Anmelde-/Voting-Sperre,
 Ansage-Text und ein Sammel-Status für Feedbacks.
+
+Das passende Companion-Modul liegt in [`companion-module/`](./companion-module/);
+das fertige Paket (`karaoke-<version>.tgz`) gibt es auf der
+[Releases-Seite](https://github.com/meyer-productions/karaoke-night-signup/releases).
 
 ## Sicherheit & Datenschutz
 

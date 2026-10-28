@@ -1,0 +1,29 @@
+{
+	"$schema": "../node_modules/@companion-module/base/assets/manifest.schema.json",
+	"type": "connection",
+	"id": "karaoke",
+	"name": "meyerproductions-karaoke",
+	"shortname": "karaoke",
+	"description": "Show-Steuerung für die Karaoke-Night-App (Songwechsel, Standbild, Anmelde-/Voting-Sperre, Ansage-Text, Status-Feedbacks) über eine dedizierte Control-API - kein Browser nötig.",
+	"version": "0.1.1",
+	"license": "MIT",
+	"repository": "git+https://github.com/meyer-productions/karaoke-night-signup.git",
+	"bugs": "https://github.com/meyer-productions/karaoke-night-signup/issues",
+	"maintainers": [
+		{
+			"name": "meyer.productions",
+			"github": "fabianmime",
+			"url": "https://meyer.productions"
+		}
+	],
+	"runtime": {
+		"type": "node22",
+		"api": "nodejs-ipc",
+		"apiVersion": "0.0.0",
+		"entrypoint": "../dist/main.js"
+	},
+	"legacyIds": [],
+	"manufacturer": "meyer.productions",
+	"products": ["Karaoke Night"],
+	"keywords": ["karaoke", "queue", "show control"]
+}
